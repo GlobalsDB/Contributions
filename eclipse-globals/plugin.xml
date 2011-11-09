@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Globals"
+            id="eclipse-globals">
+      </category>
+      <view
+            name="Globals View"
+            icon="icons/sample.gif"
+            category="eclipse-globals"
+            class="org.tpspencer.globals.eclipse.viewer.GlobalsView"
+            id="org.tpspencer.globals.eclipse.viewer.GlobalsView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.TaskList"
+               relationship="right"
+               id="org.tpspencer.globals.eclipse.viewer.GlobalsView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+
+</plugin>
