@@ -3,3 +3,9 @@ Globals Samples
 
 TPS: 08/11/11
 Added rfid-monitoring, a very simple sample app using Globals
+
+TPS: 09/11/11
+Added eclipse-globals, a simple Globals view Eclipse plugin sample
+
+TPS: 10/11/11
+Added globals-wrapper, a GDS inspired wrapper!
