@@ -1,3 +1,6 @@
+Version 2.0:
+
+
 This program is a document-database built on globals Cache in Node.js.
 
 In the current build, documents and collections are the same type of object (called "documents).
@@ -10,10 +13,17 @@ This build is an improvement over the previous build because it allows docu-cept
  inside documents inside documents...). Known weaknesses include not being able to move a document
  from one "branch" of the tree to another, and storing documents and non-documents separately.
 
-NOTE: As previously, the first four lines of code determine where the program "looks" for globals cache,
+NOTE: As in previous versions, the first four lines of code determine where the program "looks" for globals cache,
  and if it is unable to find it, it will encounter a bug.
 
 NOTE 2: In this version, before setting data, you must:
 	1)create a document
 	2)promote that document to a collection with promoteToCollection()
 	3)use addDatum() or addDocument() to add data or a document (respectively)
+
+
+
+Version 2.1 Patch Notes:
+This version now has a much more logical storage system for data and documents. It also features 100% less redundant variables!
+
+DumpInfo() is also much improved in this version, using line breaks and indenting to make things much more readable.
