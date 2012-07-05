@@ -27,3 +27,12 @@ Version 2.1 Patch Notes:
 This version now has a much more logical storage system for data and documents. It also features 100% less redundant variables!
 
 DumpInfo() is also much improved in this version, using line breaks and indenting to make things much more readable.
+
+
+Version 2.2 Patch Notes:
+
+Now has a heavily-commented sample program which explains how the program works.
+
+Fixed a bug where a collection name could not contain a space.
+
+Improved the document constructor so that you can construct a document as a collection or in another document.
