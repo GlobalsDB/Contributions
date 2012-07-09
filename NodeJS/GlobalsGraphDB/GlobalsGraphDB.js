@@ -4,7 +4,7 @@ var globals = require(rootOfNodeInstall+'\\cache');
 var pathToGlobalsMGR = rootOfGlobalsInstall + '/mgr';
 
 
-
+var assert=require('assert');
 testMethod();
 
 function graph (name)
@@ -13,7 +13,7 @@ function graph (name)
 	this.addVertex=addVertex; //finished
 	this.dumpInfo=dumpInfo; //finished
 	this.killGraph=killGraph; //finished
-	
+	this.deleteVertex=deleteVertex;	//finished
 	
 	
 	//beginning of the "actual" graph constructor
@@ -60,19 +60,19 @@ function graph (name)
 			ref2="";
 			ref2=this.global.order({
 				global:this.name,
-				subscripts:[ref1, "data",ref2]
+				subscripts:[ref1, ref1,ref2]
 			}).result;
 			while(ref2!="") //print the data
 			{
 				string="\t\t"+ref2+ ": ";
 				string+=this.global.get({
 					global:this.name,
-					subscripts: [ref1, "data", ref2]
+					subscripts: [ref1, ref1, ref2]
 				}).data;
 				console.log(string);
 				ref2=this.global.order({
 					global:this.name,
-					subscripts:[ref1, "data",ref2]
+					subscripts:[ref1, ref1,ref2]
 				}).result;
 			}																	//this is part of dumpInfo()
 			
@@ -85,7 +85,7 @@ function graph (name)
 			}).result;
 			while(ref2!="")
 			{
-				if (ref2!="data")
+				if (ref2!=ref1)
 				{
 					string="\t\t("+ref1+ ", "+ ref2 + ") which has the following data:";
 					console.log(string);
@@ -126,12 +126,37 @@ function graph (name)
 	}
 	//end of dumpInfo()	
 	
-	function killGraph()
+	function killGraph() //public method; clears the graph and closes the connection to the database
 	{
 		this.global.kill({
 			global:this.name
 		});
 		this.global.close();
+	}
+	
+	function deleteVertex(vertexName) //public method; deletes the named vertex, as well as all edges to or from it
+	{
+		this.global.kill({
+			global: this.name,
+			subscripts: [vertexName]
+		});   //this step deletes the vertex and all edges from it
+		//to delete edges to it:
+		var ref="";
+		ref=this.global.order({
+			global:this.name,
+			subscripts: [ref]
+		}).result;
+		while(ref!="")
+		{
+			this.global.kill({
+				global: this.name,
+				subscripts: [ref, vertexName]
+			});
+			ref=this.global.order({
+				global:this.name,
+				subscripts: [ref]
+			}).result;
+		} 
 	}
 }
 
@@ -141,8 +166,8 @@ function vertex (name, graph)
 	this.addInfo=addInfo; //finished
 	this.listConnected1=listConnected1; //finished
 	this.listConnected2=listConnected2; //finished
-	this.goAlong=goAlong;
-	this.deleteEdge=deleteEdge; //messed up; needs work
+	this.deleteEdge=deleteEdge; //finished
+	this.deleteSelf=deleteSelf; //finished
 
 	
 	
@@ -167,7 +192,7 @@ function vertex (name, graph)
 	{
 		this.graph.global.set({
 			global: this.graph.name,
-			subscripts: [this.name, "data", key],
+			subscripts: [this.name, this.name, key],
 			data: value
 		});
 	}
@@ -190,7 +215,7 @@ function vertex (name, graph)
 		var edgeNames=[];
 		while (ref!="")
 		{
-			if (ref!="data")
+			if (ref!=this.name)
 			{
 				edgeNames.push(ref);
 			}
@@ -231,7 +256,7 @@ function vertex (name, graph)
 			if (this.graph.global.data({
 				global: this.graph.name,
 				subscripts: [ref, this.name]
-			}).defined%2===1)
+			}).defined%2===1&& this.name!=ref)
 			{
 				edgeNames.push(ref);
 			}
@@ -252,19 +277,17 @@ function vertex (name, graph)
 	}
 	
 	
-	function goAlong(edgeName) //public method; given a string, go along that edge and return that node
+	function deleteEdge(vertexName) //public method; deletes the edge from this node to the vertexName node
 	{
-		var a= this.graph.global.get({
+		this.graph.global.kill({
 			global: this.graph.name,
-			subscripts: [this.name, edgeName]
-		}).data;
-		console.log(isAnEdge(a));
+			subscripts: [this.name, vertexName]
+		});
 	}
 	
-	function deleteEdge(vertexName) //public method; deletes the edge from this node to the edgeName node
-	//not currently functional
+	function deleteSelf () //public method; deletes vertex and all edges to or from it
 	{
-//		if (is actually a valid edge)
+		this.graph.deleteVertex(this.name);
 	}
 }
 
@@ -273,14 +296,14 @@ function edge(fromVert, toVert)
 {
 	//list of methods:
 	this.addInfo=addInfo;  //finished
-	this.deleteEdge=deleteEdge; //finished
-	//need to do: assert that vertices are on the same graph
+	this.deleteSelf=deleteSelf; //finished
 
 	//beginning of "actual" edge constructor
+	//check that vertices are from the same graph:
+	assert.equal(fromVert.graph, toVert.graph, "The vertices of an edge need to be from the same graph!");
 	this.fromVertex=fromVert;
 	this.toVertex=toVert;
 	this.isAnEdge=true;
-	//put in an assertion about fromVertex.graph==toVertex.graph
 	this.fromVertex.graph.global.set({
 		global: this.fromVertex.graph.name,
 		subscripts: [this.fromVertex.name, this.toVertex.name],
@@ -300,16 +323,13 @@ function edge(fromVert, toVert)
 	
 	
 	
-	function deleteEdge() //public method; removes the edge from the database
+	function deleteSelf() //public method; removes this edge from the database
 	{
-		this.fromVertex.graph.global.kill({
-			global:this.fromVertex.graph.name,
-			subscripts: [this.fromVertex.name, this.toVertex.name]
-		});
+		this.fromVertex.deleteEdge(this.toVertex.name);
 	}
 }
 
-function isAnEdge(candidate) //returns true if candidate is an edge and false otherwise
+function isAnEdge(candidate) //private method; returns true if candidate is an edge and false otherwise
 {
 	if(candidate===undefined)
 		{
@@ -319,7 +339,7 @@ function isAnEdge(candidate) //returns true if candidate is an edge and false ot
 }
 
 
-function isAVertex(candidate) //returns true if candidate is a vertex and false otherwise
+function isAVertex(candidate) //private method; returns true if candidate is a vertex and false otherwise
 	{
 		if(candidate===undefined)
 			{
@@ -333,16 +353,18 @@ function isAVertex(candidate) //returns true if candidate is a vertex and false 
 
 function testMethod() //a method for testing the class
 {
-	var a=new graph ("Workers");
-	var b=new vertex("Robert",a);
-	var c=new vertex("Iran",a);
-	var d=new vertex("Michael",a);
-	var e=new edge(b,c);
-	e.addInfo("relationship", "boss");
-	var f=new edge(b,d);
-	var g=new edge(c,d);
-	g.addInfo("relationship", "co-worker");
-	b.addInfo("last name", "Huben");
-	a.dumpInfo();
-	a.killGraph();
+
+	var a=[];
+	a[0] =new graph ("Workers");
+	a[1] =new vertex("Robert",a[0]);
+	a[2] =new vertex("Iran",a[0]);
+	a[3] =new vertex("Michael",a[0]);
+	a[4] =new edge(a[1],a[2]);
+	a[4].addInfo("relationship", "boss");
+	a[5] =new edge(a[1],a[3]);
+	a[6] =new edge(a[2],a[3]);
+	a[6].addInfo("relationship", "co-worker");
+	a[1].addInfo("last name", "Huben");
+	a[0].dumpInfo();
+	a[0].killGraph();  
 }
