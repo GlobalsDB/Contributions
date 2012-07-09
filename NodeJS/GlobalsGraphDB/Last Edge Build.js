@@ -258,7 +258,7 @@ function vertex (name, graph)
 			if (this.graph.global.data({
 				global: this.graph.name,
 				subscripts: [ref, this.name]
-			}).defined>0&& this.name!=ref)
+			}).defined%2===1&& this.name!=ref)
 			{
 				edgeNames.push(ref);
 			}
@@ -279,22 +279,12 @@ function vertex (name, graph)
 	}
 	
 	
-	function deleteEdge(vertex) //public method; deletes the edge from this node to the vertexName node
+	function deleteEdge(vertexName) //public method; deletes the edge from this node to the vertexName node
 	{
-		if (isAVertex(vertex))
-		{
-			this.graph.global.kill({
-				global: this.graph.name,
-				subscripts: [this.name, vertex.name]
-			});
-		}
-		else
-		{
-			this.graph.global.kill({
-				global: this.graph.name,
-				subscripts: [this.name, vertex]
-			});
-		}
+		this.graph.global.kill({
+			global: this.graph.name,
+			subscripts: [this.name, vertexName]
+		});
 	}
 	
 	function deleteSelf () //public method; deletes vertex and all edges to or from it
@@ -302,58 +292,73 @@ function vertex (name, graph)
 		this.graph.deleteVertex(this.name);
 	}
 	
-	function addEdgeInfo(vertex, key, value, reflect)
-	/*
-	 * public method
-	 * 
-	 * adds data to an edge
-	 * can accept vertex as either a vertex OR the name of the vertex
-	 * 
-	 * reflect is an optional parameter
-	 * if it is true, then the edge from vertex to this will recieve the same information
-	 * 
-	 * will throw an assertion if vertex=this
-	 * this prevents having an edge to yourself
-	 */
+	function addEdgeInfo(vertex, key, value) //public method; adds info to an edge without the edge having to exist
 	{
 		if (isAVertex(vertex))
 		{
-			assert.notEqual(vertex, this, "You may not have an edge from a vertex to itself.");
 			this.graph.global.set ({
 				global: this.graph.name,
 				subscripts: [this.name, vertex.name, key],
 				data: value
 			});
-			if (reflect==true)
-			{
-				this.graph.global.set ({
-					global: this.graph.name,
-					subscripts: [vertex.name, this.name, key],
-					data: value
-				});
-			}
 		}
 		else
 		{
-			assert.notEqual(vertex, this.name, "You may not have an edge from a vertex to itself.");
 			this.graph.global.set ({
 				global: this.graph.name,
 				subscripts: [this.name, vertex, key],
 				data: value
 		});
-			if (reflect==true)
-			{
-				this.graph.global.set ({
-					global: this.graph.name,
-					subscripts: [vertex, this.name, key],
-					data: value
-				});
-			}
 		}
 	}
 }
 
 
+function edge(fromVert, toVert)
+{
+	//list of methods:
+	this.addInfo=addInfo;  //finished
+	this.deleteSelf=deleteSelf; //finished
+
+	//beginning of "actual" edge constructor
+	//check that vertices are from the same graph:
+	assert.equal(fromVert.graph, toVert.graph, "The vertices of an edge need to be from the same graph!");
+	this.fromVertex=fromVert;
+	this.toVertex=toVert;
+	this.isAnEdge=true;
+	this.fromVertex.graph.global.set({
+		global: this.fromVertex.graph.name,
+		subscripts: [this.fromVertex.name, this.toVertex.name],
+		data: this
+	});
+	//end of "actual" edge constructor
+	
+	
+	function addInfo(key, value)//public method; adds a datum to an edge
+	{
+		this.fromVertex.graph.global.set({
+			global: this.fromVertex.graph.name,
+			subscripts: [this.fromVertex.name, this.toVertex.name, key],
+			data: value
+		});
+	}
+	
+	
+	
+	function deleteSelf() //public method; removes this edge from the database
+	{
+		this.fromVertex.deleteEdge(this.toVertex.name);
+	}
+}
+
+function isAnEdge(candidate) //private method; returns true if candidate is an edge and false otherwise
+{
+	if(candidate===undefined)
+		{
+		return false;
+		}
+	return(!(candidate.isAnEdge===undefined)&& candidate.isAnEdge);
+}
 
 
 function isAVertex(candidate) //private method; returns true if candidate is a vertex and false otherwise
@@ -389,87 +394,19 @@ function testMethod() //a method for testing the class
 
 function sampleMethod()
 {
-	/*
-	 * This will be a heavily-documented sample of what you can do with GlobalsGraphDB\
-	 * 
-	 * Let's start by creating a graph and putting in some data
-	 */
-	console.log("Creating a graph with some data...\n");
-	var relationships=new graph ("Relationships"); //first we make a graph in which we will store our data
-	var namesArray=["Alex","Ben","Cory"]; //we will be using an array to initialize the vertices of our graph
-	var peopleArray= []; //we will also use an array to hold the references to our vertices
-	for (var i=0; i<3;i++)
+	var relationships=new graph ("Relationships");
+	var namesArray=["A","B","C","D","E"];
+	var peopleArray= [];
+	for (var i=0; i<5;i++)
 	{
 		peopleArray[i]=new vertex(namesArray [i], relationships);
-		/*
-		 * notice that when calling the vertex constructor, we give it two arguments:
-		 * the "name" of the vertex, and the graph we want it to be part of
-		 * 
-		 * we could have only given it the first argument, which would make a vertex
-		 * not attached to any graph, and then added the vertex to a graph later like so:
-		 * 
-		 * peopleArray[i]=new vertex(namesArray [i]);
-		 * relationships.addVertex(peopleArray[i]);
-		 * 
-		 * but note that you cannot add data to a vertex unless it is associated to a graph
-		 */
 	}
-	peopleArray[0].addInfo("last name", "Smith"); //we add the following datum to the vertex named "Alex": the last name "Smith"
-	peopleArray[1].addInfo("last name", "Smith");
-	peopleArray[1].addInfo("age", 24);
-	peopleArray[2].addInfo("last name", "Johnson");
-	peopleArray[0].addEdgeInfo(peopleArray [1], "relationship", "sister"); 
-	/*
-	 * notice that to add information to an edge, we use three parameters:
-	 * the "to" vertex (or its name)
-	 * the key with which to reference this datum
-	 * and the datum itself
-	 */
-	peopleArray[0].addEdgeInfo(peopleArray [1], "Met via", "being siblings", true);
-	/*
-	 * When adding edge info here, we use a fourth parameter as well.
-	 * By setting the fourth parameter to true, we will add the data to the edge going the other way as well
-	 * In other words, both the edge from person 0 to person 1 and from person 1 to person 2
-	 * will now have a "met via: being siblings" value
-	 */
-	peopleArray[1].addEdgeInfo(peopleArray [0], "state of friendship", "loathing");
-	peopleArray[0].addEdgeInfo(peopleArray [1], "state of friendship", "acceptance");
-	peopleArray[1].addEdgeInfo(peopleArray [0], "relationship", "brother");
-	peopleArray[2].addEdgeInfo(peopleArray [1], "relationship", "engaged", true);
-	peopleArray[2].addEdgeInfo(peopleArray [1], "met at", "college", true);
-	peopleArray[2].addEdgeInfo(peopleArray [0], "met at", "has never met, but has heard about");
-	//Let's say that's enough data
-	
-	relationships.dumpInfo(); //this prints the info in the graph
-	console.log("----------------------------\n\n");
-
-	// the following methods will say which vertices have edges from and to, respectively, the reference variable
-	peopleArray[1].listConnected1(1);
-	peopleArray[2].listConnected2(1);
-	
-	/*
-	 * notice that the parameter of the above is 1, which caused it to print that message
-	 * if the parameter is left out, the method instead returns the array
-	 * so the following will not print anything:
-	 * 
-	 */
-	peopleArray[1].listConnected1();
-	peopleArray[2].listConnected2();
-	
-	//then we can delete a single edge:
-	console.log("Deleting some data...");
-	peopleArray[1].deleteEdge(peopleArray[0]);
-	//and see what changes:
-	peopleArray[1].listConnected1(1);
-	
-	
-	console.log("----------------------------\n\n");
-	//then we can delete an entire vertex:
-	console.log("Deleting more data...");
-	peopleArray[0].deleteSelf();
-	//and see what changes:
+	peopleArray[0].addInfo("last name", "Smith");
+	peopleArray[4].addInfo("last name", "Smith");
+	peopleArray[1].addInfo("last name", "Chen");
+	peopleArray[2].addInfo("last name", "Smith");
+	peopleArray[3].addInfo("last name", "Jones");
+	peopleArray[0].addEdgeInfo(namesArray[2], "relationship", "sister");
 	relationships.dumpInfo();
-	
-	
-	relationships.killGraph(); //this clears all the data from the graph and closes the database
+	relationships.killGraph();
 }
