@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlobalsGraphDB", "GlobalsGraphDB\GlobalsGraphDB.csproj", "{294B74A5-B191-4780-B876-0BE51622C026}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphSampleGUI", "GraphSampleGUI\GraphSampleGUI.csproj", "{4110BD45-1EBE-46D1-95EE-4020AAEE5B06}"
