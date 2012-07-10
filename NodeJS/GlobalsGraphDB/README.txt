@@ -34,3 +34,7 @@ Removed Edges as an object after I realized that they were inconvenient to work 
 reflect the current build.
 
 Also created a heavily-commented sample method which goes through many of the features of GlobalsGraphDB.
+
+
+UPDATE NOTES (7/10/12):
+Added a deleteEdge() method to the graph class. Removed testMethod(). A few other minor tweaks.

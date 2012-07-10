@@ -6,7 +6,9 @@ var assert=require('assert');
 
 
 sampleMethod();
-//testMethod();
+
+
+
 
 function graph (name)
 {
@@ -15,6 +17,7 @@ function graph (name)
 	this.dumpInfo=dumpInfo; //finished
 	this.killGraph=killGraph; //finished
 	this.deleteVertex=deleteVertex;	//finished
+	this.deleteEdge=deleteEdge;
 	
 	
 	//beginning of the "actual" graph constructor
@@ -159,6 +162,44 @@ function graph (name)
 			}).result;
 		} 
 	}
+	
+	function deleteEdge(fromVertex, toVertex, reflect)
+	/*
+	 * public method
+	 * 
+	 * deletes the edge from fromVertex to toVertex
+	 * 
+	 * the vertices may be either the actual vertex objects
+	 * or the names of the vertices
+	 * 
+	 * reflect is an optional parameter
+	 * if reflect==true then the edge from toVertex to 
+	 * fromVertex will also be deleted
+	 */
+	{
+		var toId; //the name of the to vertex to be deleted
+		var fromId; //the name of the from vertex to be deleted
+		if (isAVertex(fromVertex))
+			{fromId=fromVertex.name;}
+		else
+			{fromId=fromVertex;}
+		if (isAVertex(toVertex))
+			{toId=toVertex.name;}	
+		else
+			{toId=toVertex;}
+		this.global.kill({
+			global: this.name,
+			subscripts: [fromId, toId]
+		});
+		if (reflect==true)
+		{
+			this.global.kill({
+				global: this.name,
+				subscripts: [toId, fromId]
+			});
+		}
+		
+	}
 }
 
 function vertex (name, graph)
@@ -279,25 +320,12 @@ function vertex (name, graph)
 	}
 	
 	
-	function deleteEdge(vertex) //public method; deletes the edge from this node to the vertexName node
+	function deleteEdge(vertex, reflect) //public method; calls deleteEdge on the graph (see that method, above, for more detail)
 	{
-		if (isAVertex(vertex))
-		{
-			this.graph.global.kill({
-				global: this.graph.name,
-				subscripts: [this.name, vertex.name]
-			});
-		}
-		else
-		{
-			this.graph.global.kill({
-				global: this.graph.name,
-				subscripts: [this.name, vertex]
-			});
-		}
+		this.graph.deleteEdge(this, vertex, reflect);
 	}
 	
-	function deleteSelf () //public method; deletes vertex and all edges to or from it
+	function deleteSelf () //public method; calls deleteVertex on the graph (see that method, above, for more detail)
 	{
 		this.graph.deleteVertex(this.name);
 	}
@@ -310,7 +338,7 @@ function vertex (name, graph)
 	 * can accept vertex as either a vertex OR the name of the vertex
 	 * 
 	 * reflect is an optional parameter
-	 * if it is true, then the edge from vertex to this will recieve the same information
+	 * if it is true, then the edge from vertex to this will receive the same information
 	 * 
 	 * will throw an assertion if vertex=this
 	 * this prevents having an edge to yourself
@@ -368,29 +396,11 @@ function isAVertex(candidate) //private method; returns true if candidate is a v
 
 
 
-function testMethod() //a method for testing the class
-{
-
-	var a=[];
-	a[0] =new graph ("Workers");
-	a[1] =new vertex("Robert",a[0]);
-	a[2] =new vertex("Iran",a[0]);
-	a[3] =new vertex("Michael",a[0]);
-	a[4] =new edge(a[1],a[2]);
-	a[4].addInfo("relationship", "boss");
-	a[5] =new edge(a[1],a[3]);
-	a[6] =new edge(a[2],a[3]);
-	a[6].addInfo("relationship", "co-worker");
-	a[1].addInfo("last name", "Huben");
-	a[0].dumpInfo();
-	a[0].killGraph();  
-}
-
 
 function sampleMethod()
 {
 	/*
-	 * This will be a heavily-documented sample of what you can do with GlobalsGraphDB\
+	 * This will be a heavily-documented sample of what you can do with GlobalsGraphDB
 	 * 
 	 * Let's start by creating a graph and putting in some data
 	 */
@@ -403,7 +413,8 @@ function sampleMethod()
 		peopleArray[i]=new vertex(namesArray [i], relationships);
 		/*
 		 * notice that when calling the vertex constructor, we give it two arguments:
-		 * the "name" of the vertex, and the graph we want it to be part of
+		 * the "name" of the vertex, 
+		 * and the graph we want it to be part of
 		 * 
 		 * we could have only given it the first argument, which would make a vertex
 		 * not attached to any graph, and then added the vertex to a graph later like so:
@@ -415,7 +426,7 @@ function sampleMethod()
 		 */
 	}
 	peopleArray[0].addInfo("last name", "Smith"); //we add the following datum to the vertex named "Alex": the last name "Smith"
-	peopleArray[1].addInfo("last name", "Smith");
+	peopleArray[1].addInfo("last name", "Smith"); //and some more data...
 	peopleArray[1].addInfo("age", 24);
 	peopleArray[2].addInfo("last name", "Johnson");
 	peopleArray[0].addEdgeInfo(peopleArray [1], "relationship", "sister"); 
@@ -429,11 +440,11 @@ function sampleMethod()
 	/*
 	 * When adding edge info here, we use a fourth parameter as well.
 	 * By setting the fourth parameter to true, we will add the data to the edge going the other way as well
-	 * In other words, both the edge from person 0 to person 1 and from person 1 to person 2
+	 * In other words, both the edge from person 0 to person 1 and from person 1 to person 0
 	 * will now have a "met via: being siblings" value
 	 */
 	peopleArray[1].addEdgeInfo(peopleArray [0], "state of friendship", "loathing");
-	peopleArray[0].addEdgeInfo(peopleArray [1], "state of friendship", "acceptance");
+	peopleArray[0].addEdgeInfo(peopleArray [1], "state of friendship", "begrudging");
 	peopleArray[1].addEdgeInfo(peopleArray [0], "relationship", "brother");
 	peopleArray[2].addEdgeInfo(peopleArray [1], "relationship", "engaged", true);
 	peopleArray[2].addEdgeInfo(peopleArray [1], "met at", "college", true);
@@ -451,7 +462,6 @@ function sampleMethod()
 	 * notice that the parameter of the above is 1, which caused it to print that message
 	 * if the parameter is left out, the method instead returns the array
 	 * so the following will not print anything:
-	 * 
 	 */
 	peopleArray[1].listConnected1();
 	peopleArray[2].listConnected2();
