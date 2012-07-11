@@ -38,3 +38,11 @@ Also created a heavily-commented sample method which goes through many of the fe
 
 UPDATE NOTES (7/10/12):
 Added a deleteEdge() method to the graph class. Removed testMethod(). A few other minor tweaks.
+
+UPDATE NOTES(7/11/12)
+Added a getDatum() method so that you can actually get a piece of info from a graph without using globals get() method. Also added information on the efficiency
+of several methods.
+
+Finally, I made a testBigGraph() method to check how the program performs with large graphs. On my computer, I am constrained by the initializer (which creates
+and adds data to the graph) before my methods noticeably slow. For me, the initializor gets annoyingly slow at maxValue=~100,000. The number of vertices is
+maxValue, the number of datum for vertices is 2*maxValue, and the number of edges is ~6*maxValue.
