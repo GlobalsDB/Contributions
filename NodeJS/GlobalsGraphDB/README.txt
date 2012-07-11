@@ -46,3 +46,11 @@ of several methods.
 Finally, I made a testBigGraph() method to check how the program performs with large graphs. On my computer, I am constrained by the initializer (which creates
 and adds data to the graph) before my methods noticeably slow. For me, the initializor gets annoyingly slow at maxValue=~100,000. The number of vertices is
 maxValue, the number of datum for vertices is 2*maxValue, and the number of edges is ~6*maxValue.
+
+UPDATE NOTES(7/11/12 part 2)
+Removed vertex objects. All interfacing with the database is done through the graph object now. The old version is stored in the "LastVertexBuild" document.
+
+Several improvements were made to the method for testing big graphs. Now a submethod is called which initializes a graph with random values. This can take a long time,
+so the graph is no longer wiped between times running the program.
+
+

@@ -5,7 +5,6 @@ var pathToGlobalsMGR = rootOfGlobalsInstall + '/mgr';
 var assert=require('assert');
 
 
-
 testBigGraph();
 //sampleMethod();
 
@@ -23,10 +22,12 @@ function graph (name)
 	this.getDatum=getDatum;
 	this.getVertexDatum=getVertexDatum;
 	this.getEdgeDatum=getEdgeDatum;
+	this.addDatum=addDatum;
+	this.addEdgeDatum=addEdgeDatum;
 	
 	
 	//beginning of the "actual" graph constructor
-	this.name=name;
+	this.name=name; //name should be a string WITHOUT SPACES
 	this.global=new globals.Cache();
 	this.global.open({
 		path: pathToGlobalsMGR,
@@ -270,7 +271,7 @@ function graph (name)
 		}).data);
 	}
 	
-	function getEdgeDatum(fromVertex, toVertex, key) 
+	function getEdgeDatum(fromVertex, toVertex, key)
 	/*
 	 * private method
 	 * 
@@ -284,6 +285,40 @@ function graph (name)
 			subscripts: [fromVertex, toVertex, key]
 		}).data);
 	}
+	
+	function addDatum(vertex, key, value)
+	{
+		var vertName=vertex;
+		if (isAVertex(vertex))
+		{
+			vertName=vertex.name;
+		}
+		this.global.set({
+			global: this.name,
+			subscripts: [vertName, vertName, key],
+			data: value
+		});
+	}
+	
+	function addEdgeDatum(fromVertex, toVertex, key, value)
+	{
+		var fromVertName=fromVertex;
+		if (isAVertex(fromVertex))
+			{
+			fromVertName=fromVertex.name;
+			}
+		var toVertName=toVertex;
+		if (isAVertex(toVertex))
+			{
+			toVertName=toVertex.name;
+			}
+		this.global.set({
+			global: this.name,
+			subscripts: [fromVertName, toVertName, key],
+			data: value
+		});
+	}
+	
 }
 //end graph class
 
@@ -507,12 +542,13 @@ function randomString() //creates a random string 8 characters long
 
 function testBigGraph() //a method for testing the scalability of the graph DB
 {
-	var maxValue=10000;
-	var naturalNumbers=new graph("NaturalNumbers");
-	var numberArray= [];
-	//create vertices
+	var maxValue=100;
+	var naturalNumbers=new graph("Numbers");
+//	var numberArray= [];
 	console.log("Starting Initialization...");
-	for (var i=0;i<maxValue;i++)
+//	createGlobal (naturalNumbers, maxValue);
+	//create vertices
+/*	for (var i=0;i<maxValue;i++)
 	{
 		if (i%Math.floor(maxValue/100)==0)
 			{
@@ -545,11 +581,33 @@ function testBigGraph() //a method for testing the scalability of the graph DB
 			numberArray[randomPosition1].addEdgeInfo(randomPosition2, randomString(), randomString());
 		}
 	} 
-	//graph is done intializing
-	console.log("Intialization complete!");
-	numberArray[7].listConnected1(1);
-	numberArray[0].listConnected2(1);
-	naturalNumbers.killGraph();
+	//graph is done intializing*/
+	console.log("Intialization complete!"); 
+//	numberArray[7].listConnected1(1);
+//	numberArray[0].listConnected2(1);
+	naturalNumbers.dumpInfo();
+//	naturalNumbers.killGraph();
+	naturalNumbers.global.close();
+}
+
+function createGlobal(graph, size)
+{
+	for (var i=0;i<size;i++)
+	{
+		graph.addDatum(i, "value", i);
+	}
+	//give vertices data
+	for (var i=0;i<size*2;i++)
+	{
+		var randomPosition=Math.floor(Math.random()*size);
+		graph.addDatum(randomPosition, randomString(), randomString());
+	}
+	for (var i=0;i<size*6;i++)
+	{
+		var randomPosition1=Math.floor(Math.random()*size);
+		var randomPosition2=Math.floor(Math.random()*size);
+		graph.addEdgeDatum(randomPosition1, randomPosition2, randomString(), randomString());
+	}
 }
 
 
