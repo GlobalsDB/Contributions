@@ -22,7 +22,8 @@ function graph (name)
 	this.getEdgeDatum=getEdgeDatum;
 	this.addVertexDatum=addVertexDatum;
 	this.addEdgeDatum=addEdgeDatum;
-	this.listConnected=listConnected;
+	this.listConnected1=listConnected1;
+	this.listConnected2=listConnected2;
 	
 	
 	//beginning of the "actual" graph constructor
@@ -144,30 +145,19 @@ function graph (name)
 		this.global.close();
 	}
 	
-	function deleteVertex(vertexName) //public method; deletes the named vertex, as well as all edges to or from it
+	function deleteVertex(vertex) //public method; deletes the named vertex, as well as all edges to or from it
 	//efficiency:O(V*(kill+order))
 	{
 		//this step deletes the vertex and all edges from it:
 		this.global.kill({
 			global: this.name,
-			subscripts: [vertexName]
+			subscripts: [vertex]
 		});
 		//this step deletes the edges to it:
-		var ref="";
-		ref=this.global.order({
-			global:this.name,
-			subscripts: [ref]
-		}).result;
-		while(ref!="")
+		var toDelete=this.listConnected2(vertex);
+		for (var i=0;i<toDelete.length;i++)
 		{
-			this.global.kill({
-				global: this.name,
-				subscripts: [ref, vertexName]
-			});
-			ref=this.global.order({
-				global:this.name,
-				subscripts: [ref]
-			}).result;
+			this.deleteEdge(toDelete[i], vertex);
 		} 
 	}
 	
@@ -187,19 +177,15 @@ function graph (name)
 	 * efficiency:O(kill)
 	 */
 	{
-		var toId; //the name of the to vertex to be deleted
-		var fromId; //the name of the from vertex to be deleted
-		fromId=fromVertex;
-		toId=toVertex;
 		this.global.kill({
 			global: this.name,
-			subscripts: [fromId, toId]
+			subscripts: [fromVertex, toVertex]
 		});
 		if (reflect==true)
 		{
 			this.global.kill({
 				global: this.name,
-				subscripts: [toId, fromId]
+				subscripts: [toVertex, fromVertex]
 			});
 		}
 		
@@ -270,6 +256,13 @@ function graph (name)
 	}
 	
 	function addVertexDatum(vertex, key, value) //adds a piece of data to a vertex
+	/*
+	 * public method
+	 * 
+	 * adds a piece of data to a vertex
+	 * 
+	 * note that you DO NOT have to call createVertex() before calling addVertexDatum()
+	 */
 	{
 		this.global.set({
 			global: this.name,
@@ -278,7 +271,7 @@ function graph (name)
 		});
 	}
 	
-	function addEdgeDatum(fromVertex, toVertex, key, value, reflect)
+	function addEdgeDatum(fromVertex, toVertex, key, value, reflect, cheating)
 	/*
 	 * public method
 	 * 
@@ -294,19 +287,25 @@ function graph (name)
 	 * then the datum will also be put in the edge
 	 * from toVertex to fromVertex
 	 * 
+	 * cheating is another option parameter
+	 * if it is true, this method will run twice as fast
+	 * but it allows you to do invalid things
 	 */
 	{
 		assert.notEqual(fromVertex, toVertex, "No data can be stored from a vertex to itself.");
-		var fromExists=this.global.data({
-			global: this.name,
-			subscripts: [fromVertex]
-		}).result;
-		var toExists=this.global.data({
-			global: this.name,
-			subscripts: [toVertex]
-		}).result;
-		assert.notEqual(fromExists, 0, "The from vertex needs to exist!");
-		assert.notEqual(toExists, 0, "The to vertex needs to exist!");
+		if(cheating!=true)
+		{
+			var fromExists=this.global.data({
+				global: this.name,
+				subscripts: [fromVertex]
+			}).result;
+			var toExists=this.global.data({
+				global: this.name,
+				subscripts: [toVertex]
+			}).result;
+			assert.notEqual(fromExists, 0, "The from vertex needs to exist!");
+			assert.notEqual(toExists, 0, "The to vertex needs to exist!");
+		}
 		this.global.set({
 			global: this.name,
 			subscripts: [fromVertex, toVertex, key],
@@ -323,7 +322,7 @@ function graph (name)
 	}
 	
 	
-	function listConnected(vertex, a)
+	function listConnected1(vertex, a)
 	/*
 	 * public method
 	 * 
@@ -362,6 +361,42 @@ function graph (name)
 			return returnable;
 		}
 	}
+	
+	function listConnected2 (vertex, a)
+	{
+		var ref="";
+		var returnable=[];
+		ref=this.global.order({
+			global: this.name,
+			subscripts: [ref]
+		}).result;
+		while(ref!="")
+		{
+		if (ref!=vertex)
+			{
+				var b= this.global.data({
+					global: this.name,
+					subscripts:[ref, vertex]
+				}).defined;
+				if (b>0)
+				{
+					returnable.push(ref);
+				}
+			}
+			ref=this.global.order({
+				global: this.name,
+				subscripts: [ref]
+			}).result;
+		}
+		if (a==1)
+			{
+			console.log("Connected Vertices: "+ returnable);
+			}
+		else 
+		{
+			return returnable;
+		}
+	}
 }
 //end graph class
 
@@ -383,13 +418,16 @@ function testBigGraph() //a method for testing the scalability of the graph DB
 {
 	var naturalNumbers=new graph("Numbers");
 	
-	
-	// this is the initialization segment:
-	randomGraph (naturalNumbers, 10000);
-	//the initialization segment will need to be run the first time, but it can be slow
+	randomGraph (naturalNumbers, 500000); //this initializes the graph, running takes a while though
 
-	//	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
-	naturalNumbers.listConnected(90, 1);
+//	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
+
+//	testGetDatum(naturalNumbers);
+	
+//	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
+
+//	testListConnected1(naturalNumbers);
+//	testListConnected2(naturalNumbers);
 	naturalNumbers.global.close();
 	//	naturalNumbers.killGraph(); //run this to clear everything and kill the graph
 }
@@ -399,7 +437,7 @@ function randomGraph(graph, size)
  * personal method
  * 
  * gives graph vertices with the names 0,1,2,..., size-1
- * also gives it 2*size data and 6*size edges 
+ * also gives it 2*size data and approximately 6*size edges 
  * 
  * should be O(size)
  */
@@ -409,7 +447,11 @@ function randomGraph(graph, size)
 	//makes the vertices
 	for (var i=0;i<size;i++)
 	{
-		graph.createVertex(i);
+		graph.addVertexDatum(i, "Invariant", randomString());
+		if (i%50000==0)
+		{
+			console.log("Phase 1 is "+ i*100/size+ "% complete.");
+		}
 	}
 	console.log("Phase 1 complete!");
 	//give vertices data:
@@ -417,6 +459,10 @@ function randomGraph(graph, size)
 	{
 		var randomPosition=Math.floor(Math.random()*size);
 		graph.addVertexDatum(randomPosition, randomString(), randomString());
+		if (i%50000==0)
+		{
+			console.log("Phase 2 is "+ i*100/(size*2)+ "% complete.");
+		}
 	}
 	console.log("Phase 2 complete!");
 	//makes edges with data:
@@ -424,12 +470,56 @@ function randomGraph(graph, size)
 	{
 		var randomPosition1=Math.floor(Math.random()*size);
 		var randomPosition2=Math.floor(Math.random()*size);
-		if (randomPosition1!=randomPosition2)
+		if (randomPosition2!=randomPosition1)
 		{
-			graph.addEdgeDatum(randomPosition1, randomPosition2, randomString(), randomString());
+			graph.addEdgeDatum(randomPosition1, randomPosition2, randomString(), randomString(), false, true);
+		}
+		if (i%50000==0)
+		{
+			console.log("Phase 3 is "+ i*100/(size*6)+ "% complete.");
 		}
 	}
 	console.log("Intialization complete!");
 }
 
+function testListConnected1(graph)
+{
+	console.log("Starting test of listConnected1() on 100,000 vertices");
+	for (var i=0;i<100000;i++)
+	{
+		graph.listConnected1(i);
+	}
+	console.log("End test of listConnected1()");
+}
 
+function testListConnected2(graph)
+{
+	console.log("Starting test of listConnected2() on 10 vertices");
+	for (var i=0;i<10;i++)
+	{
+		graph.listConnected2(i, 1);
+	}
+	console.log("End test of listConnected2()");
+}
+
+function testDeleteVertex(graph)
+{
+	console.log("Starting test of deleteVertex() on 10 vertices");
+	for (var i=0;i<10;i++)
+		{
+		graph.deleteVertex(i);
+		console.log("The vertex " +i+ " was deleted.");
+		}
+	console.log("End test of deleteVertex()");
+}
+
+function testGetDatum(graph)
+{
+	console.log("Starting test of getDatum() on 500,000 vertices");
+	for (var i=0;i<500000;i++)
+		{
+		graph.getDatum(i, "Invariant");
+
+		}
+	console.log("End test of getDatum()");
+}

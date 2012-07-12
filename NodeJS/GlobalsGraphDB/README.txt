@@ -53,4 +53,8 @@ Removed vertex objects. All interfacing with the database is done through the gr
 Several improvements were made to the method for testing big graphs. Now a submethod is called which initializes a graph with random values. This can take a long time,
 so the graph is no longer wiped between times running the program.
 
+UPDATE NOTES(7/12/12)
+This commit primarily brings some observations about the efficiency of the program. For this purpose, please see the new "Efficiency Notes" document.
 
+There have also been some added features and tweeks. I have changed the name of listConnected() to listConnected1() and I have reintroduced listConnected2(),
+a method that was removed with vertex objects. I have also changed deleteVertex() to make use of listConnected2().
