@@ -58,24 +58,25 @@ function graph (name)
 	 */	
 	{
 		console.log("The graph named \"" +this.name+ "\" has the following information:");
-		var vertexNames=this.listVertices();
+		var vertexNames=this.listVertices(); //names of the vertices
 		var string;
 		for (var i=0;i<vertexNames.length;i++) //for each vertex...
 		{
 			console.log("\tA vertex named \""+vertexNames[i]+ "\" which contains the following data:");
-			var dataKeys=this.listVertexKeys(vertexNames[i]);
+			var dataKeys=this.listVertexKeys(vertexNames[i]); //list of the keys of the data for each vertex
 			for (var j=0;j<dataKeys.length;j++) //print the data...
 			{
 				string="\t\t"+dataKeys[j]+ ": " + this.getDatum(vertexNames[i], dataKeys[j]);
 				console.log(string);
 			}
 			
+			//then print the edge info
 			console.log("\tand has the following edges:");
-			var connectedEdges=this.listConnected1(vertexNames[i]);
+			var connectedEdges=this.listConnected1(vertexNames[i]); //list of the edges which this is connected to
 			for (var j=0;j<connectedEdges.length;j++)
 			{
 				var edgeDataKeys=this.listEdgeKeys(vertexNames[i], connectedEdges [j]);
-				for (var k=0;k<vertexNames[i].length;k++)
+				for (var k=0;k<edgeDataKeys.length;k++)
 				{
 					string="\t\t\t("+vertexNames[i]+ ","+connectedEdges[j]+ ")  "+edgeDataKeys[k]+ ": "+
 						this.getDatum(vertexNames[i], connectedEdges[j], edgeDataKeys[k]);
@@ -129,11 +130,11 @@ function graph (name)
 	{
 		this.global.kill({
 			global: this.name,
-			subscripts: [fromVertex, toVertex]
+			subscripts: [fromVertex, "connectedFromThis", toVertex]
 		});
 		this.global.kill({
 			global:this.name,
-			subscripts: [toVertex, toVertex, "connectedToThis", fromVertex]
+			subscripts: [toVertex, "connectedToThis", fromVertex]
 		});
 		if (reflect==true)
 		{
@@ -184,7 +185,7 @@ function graph (name)
 	{
 		return (this.global.get({
 			global: this.name,
-			subscripts: [vertex, vertex, "data", key]
+			subscripts: [vertex, "data", key]
 		}).data);
 	}
 	
@@ -197,10 +198,9 @@ function graph (name)
 	 * efficiency: O(get)
 	 */
 	{
-		assert.notEqual(fromVertex, toVertex, "No data can be stored from a vertex to itself, so no data can be retrieved!");
 		return (this.global.get({
 			global: this.name,
-			subscripts: [fromVertex, toVertex, key]
+			subscripts: [fromVertex, "connectedFromThis", toVertex, key]
 		}).data);
 	}
 	
@@ -215,7 +215,7 @@ function graph (name)
 	{
 		this.global.set({
 			global: this.name,
-			subscripts: [vertex, vertex, "data", key],
+			subscripts: [vertex, "data", key],
 			data: value
 		});
 	}
@@ -241,7 +241,6 @@ function graph (name)
 	 * but it allows you to do invalid things
 	 */
 	{
-		assert.notEqual(fromVertex, toVertex, "No data can be stored from a vertex to itself.");
 		if(cheating!=true)
 		{
 			var fromExists=this.global.data({
@@ -257,12 +256,12 @@ function graph (name)
 		}
 		this.global.set({ //sets the data
 			global: this.name,
-			subscripts: [fromVertex, toVertex, key],
+			subscripts: [fromVertex, "connectedFromThis", toVertex, key],
 			data: value
 		});
 		this.global.set({ 
 			global: this.name,
-			subscripts: [toVertex, toVertex, "connectedToThis", fromVertex],
+			subscripts: [toVertex, "connectedToThis", fromVertex],
 			data: fromVertex
 		});
 		if (reflect==true)
@@ -285,17 +284,14 @@ function graph (name)
 		var returnable=[];
 		ref=this.global.order({
 			global: this.name,
-			subscripts: [vertex, ref]
+			subscripts: [vertex, "connectedFromThis", ref]
 		}).result;
 		while (ref!="")
 		{
-			if (ref!=vertex)
-			{
-				returnable.push (ref);
-			}
+			returnable.push (ref);
 			ref=this.global.order({
 				global: this.name,
-				subscripts: [vertex, ref]
+				subscripts: [vertex, "connectedFromThis", ref]
 			}).result;
 		}
 		if (a==1)
@@ -321,14 +317,14 @@ function graph (name)
 		var returnable=[];
 		ref=this.global.order({
 			global:this.name,
-			subscripts: [vertex, vertex, "connectedToThis", ref]
+			subscripts: [vertex, "connectedToThis", ref]
 		}).result;
 		while (ref!="")
 		{
 			returnable.push(ref);
 			ref=this.global.order({
 				global:this.name,
-				subscripts: [vertex, vertex, "connectedToThis", ref]
+				subscripts: [vertex, "connectedToThis", ref]
 			}).result;
 		}
 		if (a==1)
@@ -347,14 +343,14 @@ function graph (name)
 		var returnable=[];
 		ref=this.global.order({
 			global: this.name,
-			subscripts: [vertex, vertex, "data", ref]
+			subscripts: [vertex, "data", ref]
 		}).result;
 		while(ref!="")
 		{
 			returnable.push(ref);
 			ref=this.global.order({
 				global: this.name,
-				subscripts: [vertex, vertex, "data", ref]
+				subscripts: [vertex, "data", ref]
 			}).result;
 		}
 		if (a==1)
@@ -378,19 +374,18 @@ function graph (name)
 	 * else returns the array
 	 */
 	{
-		assert.notEqual(fromVertex, toVertex, "There can be no data stored in an edge from a vertex to itself!");
 		var ref="";
 		var returnable=[];
 		ref=this.global.order({
 			global: this.name,
-			subscripts: [fromVertex, toVertex, ref]
+			subscripts: [fromVertex, "connectedFromThis", toVertex, ref]
 		}).result;
 		while(ref!="")
 		{
 			returnable.push(ref);
 			ref=this.global.order({
 				global: this.name,
-				subscripts: [fromVertex, toVertex, ref]
+				subscripts: [fromVertex, "connectedFromThis", toVertex, ref]
 			}).result;
 		}
 		if (a==1)
@@ -458,10 +453,10 @@ function testBigGraph() //a method for testing the scalability of the graph DB
 	var naturalNumbers=new graph("Numbers");
 	
 	
-	randomGraph (naturalNumbers, 500000); //this initializes the graph, running takes a while though
+	randomGraph (naturalNumbers, 10, 6); //this initializes the graph, running takes a while though
 
 //	naturalNumbers.listVertices(1);
-//	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
+	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
 	
 //	testDeleteVertex(naturalNumbers);
 //	testGetDatum(naturalNumbers);
@@ -474,12 +469,12 @@ function testBigGraph() //a method for testing the scalability of the graph DB
 	//	naturalNumbers.killGraph(); //run this to clear everything and kill the graph
 }
 
-function randomGraph(graph, size)
+function randomGraph(graph, size, multiplier)
 /*
  * personal method
  * 
  * gives graph vertices with the names 0,1,2,..., size-1
- * also gives it 2*size data and approximately 6*size edges 
+ * also gives it 2*size data and approximately multiplier*size edges 
  * 
  * should be O(size)
  */
@@ -508,15 +503,11 @@ function randomGraph(graph, size)
 	}
 	console.log("Phase 2 complete!");
 	//makes edges with data:
-	var multiplier=5;
 	for (var i=0;i<size*multiplier;i++)
 	{
 		var randomPosition1=Math.floor(Math.random()*size);
 		var randomPosition2=Math.floor(Math.random()*size);
-		if (randomPosition2!=randomPosition1)
-		{
-			graph.addEdgeDatum(randomPosition1, randomPosition2, randomString(), randomString(), false, true);
-		}
+		graph.addEdgeDatum(randomPosition1, randomPosition2, randomString(), randomString(), false, true);
 		if (i%50000==0)
 		{
 			console.log("Phase 3 is "+ i*100/(size*multiplier)+ "% complete.");
@@ -561,7 +552,6 @@ function testGetDatum(graph)
 	for (var i=0;i<500000;i++)
 		{
 		graph.getDatum(i, "Invariant");
-
 		}
 	console.log("End test of getDatum()");
 }
