@@ -1,7 +1,8 @@
 This is a globals-based graph database implemented in Node.js.
 
-A graph is an object with a name and a global as data within it. The methods for graphs are designed so that no user has to actually call get(), set(), kill(), etc 
-on a global. See the commments for details on the methods.
+A graph is an object with a name, a global, and a boolean as data within it. The name MUST NOT CONTAIN SPACES due to the constraints of the globals database.
+The global contains all the data. The boolean is false if it is a directed graph and true if it is an undirected graph. The methods for graphs are designed so
+that no user has to actually call get(), set(), kill(), etc on a global. See the commments for details on the methods.
 
 Data is stored in the graph in a precise format. Each graph has a name and a global, and the global actually stores all the data. Each vertex corresponds to a node directly 
 below the root node in the global. The subscripts for this node are [vertexName]. 
@@ -20,8 +21,8 @@ a "Time Known" value, the subscripts would be ["Robert", "connectedFromThis", "I
 This version has support for edges from a vertex to itself. They can be handled in exactly the same way other edges are handled.
 
 This version has support for undirected graphs, that is, graphs where each edge from A to B is also an edge from B to A and has the same data going either way.
-In order to make use of this, you must set the "reflect" parameter to true whenever you call deleteEdge() or addEdgeDatum(). Then when you call getVertexDatum()
-or listEdgeKeys() you may call it with the vertices in either order.
+In order to make use of this, set the second parameter to true when calling the constructor. Alternatively, you may set the "reflect" parameter to true every time you call 
+deleteEdge() or addEdgeDatum(). When calling getVertexDatum() or listEdgeKeys() on an undirected graph, you may call it with the vertices in either order.
 
 Note: you may have to configure the first four lines of code so that the program is able to find the correct globals directory.
 
@@ -60,7 +61,7 @@ Several improvements were made to the method for testing big graphs. Now a subme
 so the graph is no longer wiped between times running the program.
 
 UPDATE NOTES(7/12/12)
-This commit primarily brings some observations about the efficiency of the program. For this purpose, please see the new "Efficiency Notes" document.
+This commit primarily brings some observations about the efficiency of the program. To see them, please look at the new "Efficiency Notes" document.
 
 There have also been some added features and tweeks. I have changed the name of listConnected() to listConnected1() and I have reintroduced listConnected2(),
 a method that was removed with vertex objects. I have also changed deleteVertex() to make use of listConnected2().
@@ -73,3 +74,8 @@ so that it isn't so much of an eyesore. Overhauled the README to reflect these c
 UPDATE NOTES (7/13/12 part 2)
 Added support for edges from a vertex to itself and for undirected graphs. Further revisions of the README. Future updates will focus on a sample method and
 more helpful commenting.
+
+UPDATE NOTES (7/13/12 part 3)
+I lied about the contents of future updates. This brings four new methods. deleteEdgeDatum() and deleteVertexDatum() do what they sound like, while deleteDatum() can be called to
+automatically call one of those. AddDatum() was also added, and it decides between addVertexDatum() and addEdgeDatum(). I also updated the comments. Many of the testing
+methods have been removed. 
