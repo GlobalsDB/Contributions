@@ -1,12 +1,51 @@
+7/13/12 Version (older versions may contradict newer versions)
+
 My Methods:
+
+	Initializing (with randomGraph()) a graph with 500,000 vertices and ~6 edges/vertex takes 7-8 minutes, 
+	but most of that time is taken up with the edges.
+
+	When initializing a graph:
+		
+		addVertexDatum():
+
+			running addVertexDatum 500,000 times takes ~5 seconds
+
+			running addVertexDatum 1,000,000 times takes ~10 seconds.
+
+			running addVertexDatum 10,000,000 times takes ~110 seconds. I think that this is indicative of an inefficiency that grows as the size increases.
+			further data will let me test this hypothesis.
+
+			running addVertexDatum 20,000,000 times takes ~225 seconds. I appears my suspicions have not been confirmed. One trend I noticed was that at
+			seemingly arbitrary points, the program paused for a few seconds. This might be caused by the globals database expanding itself to hold more data.
+
+		addEdgeDatum() on a graph with 100,000 edges and cheating:
+
+			running addEdgeDatum 200,000 times takes ~3 seconds
+
+			running addEdgeDatum 1,000,000 times takes ~20 seconds
+
+			running addEdgeDatum 2,000,000 times takes ~40 seconds
+
+		addEdgeDatum() on a graph with 100,000 edges and without cheating:
+
+			running addEdgeDatum 500,000 times takes ~17 seconds
+
+			running addEdgeDatum 1,000,000 times takes ~33 seconds
+
+			running addEdgeDatum 2,000,000 times takes ~70 seconds
+
+
+
 
 	For a graph with 500,000 vertices and ~6 edges/vertex:
 
 		to run listConnected1() 100,000 times took ~6 seconds
 
-		to run listConnected2() 10 times took ~65 seconds
+		to run the old listConnected2() 10 times took ~65 seconds (no longer in the program)
 
-		to run deleteVertex() 10 times took ~60 seconds
+		to run the new listConnected2() 500,000 times took ~35 seconds
+		this is a vast improvement, since at the previous rate this would have taken a month
 
 		to run getDatum() 100,000 times took ~1.5 seconds
 
@@ -22,38 +61,31 @@ My Methods:
 
 		to run listConnected1() 100,000 times took ~5 seconds
 
-		to run listConnected2() 10 times took ~13 seconds
-
-		to run deleteVertex() 10 times took ~12 seconds
+		to run deleteVertex() 100,000 times took ~2 seconds
 
 		to run getDatum() 100,000 times took ~1.5 seconds
 
 
 
 
-	Observations: 
-		listConnected1() is O(number of edges from vertex)
-		listConnected2() is O(number of vertices in graph)
-		deleteVertex() is O(number of vertices in graph) because (and only because) it caalls listConnected2()
-
-
-
 Conclusions:
 	
-	Several methods' efficiencies are bounded by globals alone, including listConnected1() and addVertexDatum(). I think that within globals, 
-	these methods are in the best efficiency class possible.
+	With the modifications I have made, the program is now only truly limited by the time it takes to initialize the graph. All methods in the graph class 
+	are able to be run tens of thousands of times per second, so once a graph is initialized, any data accessing should happen nearly instantaneously.	
 
-	I believe AddEdgeDatum(), as written, is also in the best efficiency class, but its time performance can be improved by a factor of two by
-	skipping some of the assertions I have included in it. Therefore I have given the option to include a 6th parameter, which, when set to
-	"true", lets you skip those assertions (which can be potentially hazardous) and improve your efficiency.
+	In order to improve efficiencies this much, addEdgeDatum() has been modified since the previous version. This had the unfortunate result of approximately halving
+	its performance. Each vertex now has an easily-accessible list of the other vertices which have an edge to this one, allowing listConnected2() (and other methods
+	which are based on listConnected2()) to run efficiently. In order to keep this list up-to-date, addEdgeDatum() now has to call "set" twice instead of once,
+	so it takes approximately twice as long to run. Because of this, I have introduced a new parameter to addEdgeDatum. This is the "cheating" parameter,
+	and by setting it to true, you can circumvent some of the assertions. This improves efficiency by a factor of 1.5-2  (see above for data), but without
+	the assertions you can do things like make an edge from or to vertices that do not exist. Because of this, I am leaving the option to cheat in,
+	but making it default to "off".
 
-	Other methods are NOT very efficient. Currently, listConnected2(), a method for finding all vertices with an edge to this vertex, checks every 
-	vertex individually, which is very inefficient. Furthermore, deleteVertex uses listConnected2(), so it is slowed as well. In a future build,
-	I may try to have each vertex include a list of those vertices which have edges to it, making these methods very fast.
+	With this change, randomGraph() now rather slow. It takes 7-8 minutes to initialize a graph with a mere 500,000 vertices, and almost all of that time is
+	spent initializing the ~3,000,000 edges. Interestingly, I noted that it took a majority of the time (5 minutes) to initialize the final ~500,000 edges. 
+	In another test, 500,000 vertices and ~2,500,000 edges were initialized in only 3.5 minutes! This makes me think that there is something going on in globals
+	which has problems storing information past a certain point. However, I am not sure how to confirm this hunch, nor do I know what to do about it if it is confirmed.
 
-	Overall, the program is currently limited by the time it takes to initialize data, which is limited by globals. Added more than 500,000 vertices
-	(and a decent number of edges to go with them) takes a long time, so it is not recommended. However, if you do spend the time intializing these 
-	vertices, the methods (except those detailed above) should remain fast.
 
 
 

@@ -24,6 +24,9 @@ function graph (name)
 	this.addEdgeDatum=addEdgeDatum;
 	this.listConnected1=listConnected1;
 	this.listConnected2=listConnected2;
+	this.listVertexKeys=listVertexKeys;
+	this.listVertices=listVertices;
+	this.listEdgeKeys=listEdgeKeys;
 	
 	
 	//beginning of the "actual" graph constructor
@@ -49,92 +52,39 @@ function graph (name)
 		});
 	}
 	
-	function dumpInfo() //note: this thing is hideous to look upon!
+	function dumpInfo()
 	/*
 	 * public method, but for personal use; prints info on the graph
 	 */	
 	{
-		var ref1="";
-		var ref2;
-		var ref3;
-		var string;
 		console.log("The graph named \"" +this.name+ "\" has the following information:");
-		ref1=this.global.order({
-			global:this.name,
-			subscripts:[ref1]
-		}).result;
-		while(ref1!="") //for each vertex...
+		var vertexNames=this.listVertices();
+		var string;
+		for (var i=0;i<vertexNames.length;i++) //for each vertex...
 		{
-			//print the data
-			console.log("\tA vertex named \""+ref1+ "\" which contains the following data:");
-			ref2="";
-			ref2=this.global.order({
-				global:this.name,
-				subscripts:[ref1, ref1,ref2]
-			}).result;
-			while(ref2!="") //print the data
+			console.log("\tA vertex named \""+vertexNames[i]+ "\" which contains the following data:");
+			var dataKeys=this.listVertexKeys(vertexNames[i]);
+			for (var j=0;j<dataKeys.length;j++) //print the data...
 			{
-				string="\t\t"+ref2+ ": ";
-				string+=this.global.get({
-					global:this.name,
-					subscripts: [ref1, ref1, ref2]
-				}).data;
+				string="\t\t"+dataKeys[j]+ ": " + this.getDatum(vertexNames[i], dataKeys[j]);
 				console.log(string);
-				ref2=this.global.order({
-					global:this.name,
-					subscripts:[ref1, ref1,ref2]
-				}).result;
-			}																	//this is part of dumpInfo()
-			
-			
-			//print the edges
-			console.log("\tand has the following edges:");
-			ref2=this.global.order({
-				global:this.name,
-				subscripts:[ref1, ref2]
-			}).result;
-			while(ref2!="")
-			{
-				if (ref2!=ref1)
-				{
-					string="\t\t("+ref1+ ", "+ ref2 + ") which has the following data:";
-					console.log(string);
-					
-					//print the info stored in the edges
-					ref3="";
-					ref3=this.global.order({
-						global: this.name,
-						subscripts: [ref1, ref2, ref3]
-					}).result;
-					while (ref3!="")
-					{
-						string="\t\t\t"+ref3+ ": ";
-						string+=this.global.get({
-							global: this.name,
-							subscripts: [ref1,ref2,ref3]
-						}).data;
-						console.log(string);
-						ref3=this.global.order({
-							global: this.name,
-							subscripts: [ref1, ref2, ref3]
-						}).result;
-					}
-				}
-				
-				ref2=this.global.order({
-					global:this.name,
-					subscripts:[ref1,ref2]
-				}).result;
 			}
-				
+			
+			console.log("\tand has the following edges:");
+			var connectedEdges=this.listConnected1(vertexNames[i]);
+			for (var j=0;j<connectedEdges.length;j++)
+			{
+				var edgeDataKeys=this.listEdgeKeys(vertexNames[i], connectedEdges [j]);
+				for (var k=0;k<vertexNames[i].length;k++)
+				{
+					string="\t\t\t("+vertexNames[i]+ ","+connectedEdges[j]+ ")  "+edgeDataKeys[k]+ ": "+
+						this.getDatum(vertexNames[i], connectedEdges[j], edgeDataKeys[k]);
+					console.log(string);
+				}
+			}
 			console.log();
-			ref1=this.global.order({
-				global:this.name,
-				subscripts:[ref1]
-			}).result;
 		}
 	}
-	//end of dumpInfo()	
 	
 	function killGraph() //public method; clears the graph and closes the connection to the database
 	//efficiency: O(kill+close)
@@ -181,12 +131,13 @@ function graph (name)
 			global: this.name,
 			subscripts: [fromVertex, toVertex]
 		});
+		this.global.kill({
+			global:this.name,
+			subscripts: [toVertex, toVertex, "connectedToThis", fromVertex]
+		});
 		if (reflect==true)
 		{
-			this.global.kill({
-				global: this.name,
-				subscripts: [toVertex, fromVertex]
-			});
+			deleteEdge(toVertex, fromVertex, false);
 		}
 		
 	}
@@ -212,16 +163,14 @@ function graph (name)
 	 * efficiency: O(get)
 	 */
 	{
-		var returnable;
 		if (param3==undefined)
 		{
-			returnable=this.getVertexDatum(param1, param2);
+			return this.getVertexDatum(param1, param2);
 		}
 		else
 		{	
-			returnable=this.getEdgeDatum(param1, param2, param3);
+			return this.getEdgeDatum(param1, param2, param3);
 		}	
-		return returnable;
 	}
 	
 	function getVertexDatum(vertex, key)
@@ -235,7 +184,7 @@ function graph (name)
 	{
 		return (this.global.get({
 			global: this.name,
-			subscripts: [vertex, vertex, key]
+			subscripts: [vertex, vertex, "data", key]
 		}).data);
 	}
 	
@@ -266,7 +215,7 @@ function graph (name)
 	{
 		this.global.set({
 			global: this.name,
-			subscripts: [vertex, vertex, key],
+			subscripts: [vertex, vertex, "data", key],
 			data: value
 		});
 	}
@@ -306,18 +255,19 @@ function graph (name)
 			assert.notEqual(fromExists, 0, "The from vertex needs to exist!");
 			assert.notEqual(toExists, 0, "The to vertex needs to exist!");
 		}
-		this.global.set({
+		this.global.set({ //sets the data
 			global: this.name,
 			subscripts: [fromVertex, toVertex, key],
 			data: value
 		});
+		this.global.set({ 
+			global: this.name,
+			subscripts: [toVertex, toVertex, "connectedToThis", fromVertex],
+			data: fromVertex
+		});
 		if (reflect==true)
 		{
-			this.global.set({
-				global: this.name,
-				subscripts: [toVertName, fromVertName, key],
-				data: value
-			});
+			this.addEdgeDatum(toVertex, fromVertex, key, value, false, true);
 		}
 	}
 	
@@ -326,13 +276,9 @@ function graph (name)
 	/*
 	 * public method
 	 * 
-	 * similar to listConnected1 from before
-	 * 
-	 * creates an array of the name of vertices to which vertex has an edge
+	 * creates an array of the names of vertices to which this vertex has an edge
 	 * if (a===1) it prints the array with a message
 	 * else it returns the array
-	 *  
-	 * efficiency:O(order*V)
 	 */
 	{
 		var ref="";
@@ -364,34 +310,127 @@ function graph (name)
 	
 	function listConnected2 (vertex, a)
 	{
+		/*
+		 * public method
+		 * 
+		 * creates an array of the names of vertices which have an edge to this vertex
+		 * if (a===1) it prints the array with a message
+		 * else it returns the array
+		 */
+		var ref="";
+		var returnable=[];
+		ref=this.global.order({
+			global:this.name,
+			subscripts: [vertex, vertex, "connectedToThis", ref]
+		}).result;
+		while (ref!="")
+		{
+			returnable.push(ref);
+			ref=this.global.order({
+				global:this.name,
+				subscripts: [vertex, vertex, "connectedToThis", ref]
+			}).result;
+		}
+		if (a==1)
+		{
+			console.log("Connected vertices: " + returnable);
+		}
+		else
+		{
+			return returnable;
+		}
+	}
+	
+	function listVertexKeys(vertex, a)
+	{
 		var ref="";
 		var returnable=[];
 		ref=this.global.order({
 			global: this.name,
-			subscripts: [ref]
+			subscripts: [vertex, vertex, "data", ref]
 		}).result;
 		while(ref!="")
 		{
-		if (ref!=vertex)
-			{
-				var b= this.global.data({
-					global: this.name,
-					subscripts:[ref, vertex]
-				}).defined;
-				if (b>0)
-				{
-					returnable.push(ref);
-				}
-			}
+			returnable.push(ref);
 			ref=this.global.order({
 				global: this.name,
+				subscripts: [vertex, vertex, "data", ref]
+			}).result;
+		}
+		if (a==1)
+		{
+			console.log("Keys: "+ returnable);
+		}
+		else 
+		{
+			return returnable;
+		}
+	}
+	
+	function listEdgeKeys (fromVertex, toVertex, a)
+	/*
+	 * public method
+	 * 
+	 * makes an array of all the data keys for the edge
+	 * from fromVertex to toVertex
+	 * 
+	 * if a==1 prints the array
+	 * else returns the array
+	 */
+	{
+		assert.notEqual(fromVertex, toVertex, "There can be no data stored in an edge from a vertex to itself!");
+		var ref="";
+		var returnable=[];
+		ref=this.global.order({
+			global: this.name,
+			subscripts: [fromVertex, toVertex, ref]
+		}).result;
+		while(ref!="")
+		{
+			returnable.push(ref);
+			ref=this.global.order({
+				global: this.name,
+				subscripts: [fromVertex, toVertex, ref]
+			}).result;
+		}
+		if (a==1)
+		{
+			console.log("Keys: "+ returnable);
+		}
+		else 
+		{
+			return returnable;
+		}
+	}
+	
+	function listVertices(a)
+	/*
+	 * public method
+	 * 
+	 * makes an array of the vertices of this graph
+	 * 
+	 * if a==1 it prints them out
+	 * else it returns them
+	 */
+	{
+		var ref="";
+		var returnable=[];
+		ref=this.global.order({
+			global:this.name,
+			subscripts: [ref]
+		}).result;
+		while (ref!="")
+		{
+			returnable.push(ref);
+			ref=this.global.order({
+				global:this.name,
 				subscripts: [ref]
 			}).result;
 		}
 		if (a==1)
-			{
-			console.log("Connected Vertices: "+ returnable);
-			}
+		{
+			console.log("Vertices: "+ returnable);
+		}
 		else 
 		{
 			return returnable;
@@ -418,10 +457,13 @@ function testBigGraph() //a method for testing the scalability of the graph DB
 {
 	var naturalNumbers=new graph("Numbers");
 	
+	
 	randomGraph (naturalNumbers, 500000); //this initializes the graph, running takes a while though
 
+//	naturalNumbers.listVertices(1);
 //	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
-
+	
+//	testDeleteVertex(naturalNumbers);
 //	testGetDatum(naturalNumbers);
 	
 //	naturalNumbers.dumpInfo();  //note: dumpInfo prints EVERYTHING, so it is not practical for large graphs
@@ -466,7 +508,8 @@ function randomGraph(graph, size)
 	}
 	console.log("Phase 2 complete!");
 	//makes edges with data:
-	for (var i=0;i<size*6;i++)
+	var multiplier=5;
+	for (var i=0;i<size*multiplier;i++)
 	{
 		var randomPosition1=Math.floor(Math.random()*size);
 		var randomPosition2=Math.floor(Math.random()*size);
@@ -476,7 +519,7 @@ function randomGraph(graph, size)
 		}
 		if (i%50000==0)
 		{
-			console.log("Phase 3 is "+ i*100/(size*6)+ "% complete.");
+			console.log("Phase 3 is "+ i*100/(size*multiplier)+ "% complete.");
 		}
 	}
 	console.log("Intialization complete!");
@@ -494,21 +537,20 @@ function testListConnected1(graph)
 
 function testListConnected2(graph)
 {
-	console.log("Starting test of listConnected2() on 10 vertices");
-	for (var i=0;i<10;i++)
+	console.log("Starting test of listConnected2() on 500,000 vertices");
+	for (var i=0;i<500000;i++)
 	{
-		graph.listConnected2(i, 1);
+		graph.listConnected2(i);
 	}
 	console.log("End test of listConnected2()");
 }
 
 function testDeleteVertex(graph)
 {
-	console.log("Starting test of deleteVertex() on 10 vertices");
-	for (var i=0;i<10;i++)
+	console.log("Starting test of deleteVertex() on 100,000 vertices");
+	for (var i=0;i<100000;i++)
 		{
 		graph.deleteVertex(i);
-		console.log("The vertex " +i+ " was deleted.");
 		}
 	console.log("End test of deleteVertex()");
 }

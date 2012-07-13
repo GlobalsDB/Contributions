@@ -2,21 +2,17 @@ This is a globals-based graph database implemented in Node.js.
 
 Two types of objects are implemented in this program: graphs and vertices.
 
-A graph has a name and a global a data within it. There are several implemented methods related to graphs, which are detailed in the comments.
+A graph has a name and a global a data within it. The methods for graphs are designed so that no user has to actually call get(), set(), kill(), etc on a global. See the
+commments for details on the methods.
 
-A vertex also has a name datum, as well as a "parent" graph. Some of the methods related to a vertex are listConnected1() and listConnected2(). These methods return
-an array of the names of the vertices which have edges from and to this edge, respectively. For methods will be implemented later.
+Data is stored in this global in a precise format. Each graph has a name and a global. Each vertex corresponds to a node directly below the root node in the global.
+The subscripts for this node are [vertexName]. Each edge corresponds with a node with two subscripts: [fromVertexName, tovertexName]. Additionally, if there is an edge from 
+vertex1 to vertex2, there will be an entry with the subscripts [vertex2, vertex2, "connectedToThis", vertex1]. This ensures that you can easily get a list of the vertices with
+and edge to this vertex. Data for a vertex is stored with three subscripts. For example, for the datum (key, value) about the edge from Vertex1 to Vertex2 would have
+the subscripts [vertex1Name, vertex2Name, key]. Data about a single vertex is stored underneath the edge from itself to itself, with the additional subscript "data".
+Thus, if I wanted to give the "Robert" vertex an "age" value, the subscripts would be ["Robert", "Robert", "data", "age"]. 
 
-Data is stored in this database by combining the global with vertices. For each vertex, there is a node directly below the root node in the global.
-The only subscript on this node is [Vertex.name]. For each edge, there is a node with two subscripts: [FromVertex.name, Tovertex.name]. 
-Data for a vertex is stored with three subscripts. For example, for the datum (key, value) about the edge from Vertex1 to Vertex2 would have the subscripts [Vertex1.name,
-Vertex2.name, key]. Data about a single vertex is stored in the edge from itself to itself. Thus, if I wanted to give the "Robert" vertex an "age" value, the subscripts would be
-["Robert", "Robert", "age"]. This prohibits having an edge from a vertex to itself which actually functions as an edge, but is otherwise an elegant solution, and 
-(unlike the previous build) you can finally have a vertex named "data"!
-
-In other words: within the global, things with one subscript are vertices, things with two subscripts are edges, and things with three subscripts are data. 
-Something with the subscripts ["foo", "bar", "bas"] is a piece of data with the key bas. If foo==bar, then it is a piece of data about the foo vertex.
-Otherwise, it is data about the edge FROM foo TO bar.
+In a later build, I may introduce the ability to have an edge to yourself, but that is not currently implemented.
 
 Note: you may have to configure the first four lines of code so that the program is able to find the correct globals directory.
 
@@ -58,3 +54,8 @@ This commit primarily brings some observations about the efficiency of the progr
 
 There have also been some added features and tweeks. I have changed the name of listConnected() to listConnected1() and I have reintroduced listConnected2(),
 a method that was removed with vertex objects. I have also changed deleteVertex() to make use of listConnected2().
+
+UPDATE NOTES (7/13/12)
+Modified how data was stored so that a vertex also has access to the names of vertices which have an edge to it. Rewrote listConnected2() to make use of this new feature,
+which allows it to run much faster. Added several new methods like listVertexKeys(), listVertices(), and listEdgeKeys(). Rewrote dumpInfo() to make use of the new methods
+so that it isn't so much of an eyesore. Overhauled the README to reflect these changes.
