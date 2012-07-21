@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Intended as a library of Ant pieces to 
+-->
+<project name="GlobalsDBUtils" xmlns="antlib:org.apache.tools.ant" default="init">
+    <target name="init">
+        <tstamp/>
+    </target>
+    <!--
+    
+    -->
+    <property name="globalsdbutils.home" location="/opt/GlobalsDB.org"/>
+    <property environment="globalsdbenv" />
+
+    <!--
+    
+    -->
+    <property name="globalsdbenv.DYLD_LIBRARY_PATH" value="" />
+    
+    <path id="java.library.path" />
+        
+    <path id="globalsdbutils.binpath">
+        <pathelement location="${globalsdbutils.home}/bin"/>
+        <path refid="java.library.path"/>
+        <path path="${globalsdbenv.DYLD_LIBRARY_PATH}" />
+    </path>
+    <!--
+    
+    -->
+    <path id="globalsdbutils.classpath">
+        <pathelement location="${globalsdbutils.home}/dev/java/lib/JDK16/globalsdb.jar"/>
+    </path>
+    
+    <path id="globalsdbutils.newpath">
+        <path refid="globalsdbutils.binpath" />
+        <pathelement location="${globalsdbutils.home}/mgr" />
+        <path path="${globalsdbenv.PATH}" />
+    </path>
+    <!--
+    
+    -->
+    <target name="info" description="Information on using GlobalsDB">
+        <echo>
+        GlobalsDB's Java Native Interface requires three environment variables:
+        GLOBAL_HOME should point to the installation root for Globals
+        DYLD_LIBRARY_PATH (Mac) must point to the location of the dynamic libraries     
+        </echo>
+    </target>
+    <!--
+    
+    -->
+    <target name="startglobals" >
+        <echo message="Attempting to start the GlobalsDB in case it's not already running" />
+        <exec  resultproperty="globalsdbutils.startglobals.status" executable="${globalsdbutils.home}/mgr/startGlobals">
+            <env key="GLOBALS_HOME" path="${globalsdbutils.home}" />
+        </exec>
+    </target>
+    <!--
+    
+    -->
+    <target name="stopglobals" >
+        <echo message="Attempting to stop the GlobalsDB" />
+        <exec  resultproperty="globalsdbutils.startglobals.status" executable="${globalsdbutils.home}/mgr/stopGlobals">
+            <env key="GLOBALS_HOME" path="${globalsdbutils.home}" />
+        </exec>
+    </target>
+    <!--
+    
+    -->
+    <pathconvert  property="globalsdbutils.binpath.prop" refid="globalsdbutils.binpath" />
+    <pathconvert  property="globalsdbutils.newpath.prop" refid="globalsdbutils.newpath" />
+    <!--
+    
+    -->
+    <macrodef name="javaWithGlobals" >
+        <attribute name="targetClass" description="Java class to run"/>
+        <attribute name="runClassPathRef" description="Runtime class path"/>
+        <sequential>
+            <echoproperties prefix="global"  />
+            <echoproperties prefix="java"  />
+            <echo message="globalsdbutils.binpath is ${globalsdbutils.binpath.prop}" />
+            <echo message="Runtime classpathref is @{runClassPathRef}, path itself is ${toString:@{runClassPathRef}}"></echo>
+            <java fork="yes" classname="@{targetClass}">
+                <classpath refid="@{runClassPathRef}" />
+                <sysproperty key="java.library.path" value="${toString:globalsdbutils.binpath}" />
+                <sysproperty key="globalsdbutils.home" value="${globalsdbutils.home}" />
+                <env key="PATH" value="${toString:globalsdbutils.newpath}" />
+                <env key="GLOBALS_HOME" value="${globalsdbutils.home}"/>
+                <env key="DYLD_LIBRARY_PATH" value="${toString:globalsdbutils.binpath}"/>
+                <env key="LD_LIBRARY_PATH" value="${toString:globalsdbutils.binpath}"/>
+            </java>
+        </sequential>
+    </macrodef>
+</project>

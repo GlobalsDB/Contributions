@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project xmlns="antlib:org.apache.tools.ant" name="GlobalsDBGraphAPI" default="all" basedir=".">
+  <property file="build.properties"/>
+  <path id="library.GlobalsDB">
+    <pathelement location="/opt/GlobalsDB.org/dev/java/lib/JDK16/globalsdb.jar"/>
+  </path>
+  <path id="classpath">
+    <path refid="library.GlobalsDB"/>
+  </path>
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${output.dir}"/>
+  </target>
+  <target name="all" description="Build the project" depends="compile,copy"/>
+  <target name="clean" description="Clean the project">
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="${output.dir}" includes="**/*"/>
+    </delete>
+  </target>
+  <target name="compile" description="Compile Java source files" depends="init">
+    <javac destdir="${output.dir}" classpathref="classpath" debug="${javac.debug}" nowarn="${javac.nowarn}"
+           deprecation="${javac.deprecation}" encoding="UTF-8" source="1.6" target="1.6">
+      <src path="src"/>
+    </javac>
+  </target>
+  <target name="javadoc" description="Generate javadoc documentation for the package">
+    <!-- Sample javadoc command line:
+    ... javadoc -J-Xmx256m -header "<b> GlobalsDB Graph API </b>" 
+    ...     -subpackages com.intersys.globals.graphapi:com.intersys.globals.graphapi.dictionary 
+    ...     -package -sourcepath /Users/awolfe/Documents/ISC-Devel/globsdb_jdev_0710a/GlobalsDBGraphAPI/src 
+    ...     -classpath /Users/awolfe/Documents/ISC-Devel/globsdb_jdev_0710a/.adf:/Users/awolfe/Documents/ISC-Devel/globsdb_jdev_0710a/GlobalsDBGraphAPI/classes:/opt/GlobalsDB.org/dev/java/lib/JDK16/globalsdb.jar 
+    ...     -encoding UTF-8 -source 1.6 -d /Users/awolfe/Documents/ISC-Devel/globsdb_jdev_0710a/GlobalsDBGraphAPI/javadoc 
+    ...     -charset UTF-8 -docencoding UTF-8
+    -->
+    <echo message="Generating javadoc - cannot generate 'All Diagrams' pane with just javadoc" />
+    <javadoc destdir="javadoc" sourcepath="src" classpathref="classpath"> 
+    </javadoc>
+  </target>
+  <target name="copy" description="Copy files to output directory" depends="init">
+    <patternset id="copy.patterns">
+      <include name="**/*.GIF"/>
+      <include name="**/*.JPEG"/>
+      <include name="**/*.JPG"/>
+      <include name="**/*.PNG"/>
+      <include name="**/*.cpx"/>
+      <include name="**/*.dcx"/>
+      <include name="**/*.ejx"/>
+      <include name="**/*.gif"/>
+      <include name="**/*.ini"/>
+      <include name="**/*.jpeg"/>
+      <include name="**/*.jpg"/>
+      <include name="**/*.png"/>
+      <include name="**/*.properties"/>
+      <include name="**/*.sva"/>
+      <include name="**/*.tag"/>
+      <include name="**/*.tld"/>
+      <include name="**/*.wsdl"/>
+      <include name="**/*.xcfg"/>
+      <include name="**/*.xlf"/>
+      <include name="**/*.xml"/>
+      <include name="**/*.xsd"/>
+      <include name="**/*.xsl"/>
+    </patternset>
+    <copy todir="${output.dir}">
+      <fileset dir="src">
+        <patternset refid="copy.patterns"/>
+      </fileset>
+    </copy>
+  </target>
+</project>

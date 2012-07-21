@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project xmlns="antlib:org.apache.tools.ant" name="root-GlobalsDBGraphAPI" default="all" basedir=".">
+	<target name="all" description="call the main ant script">
+		<ant
+			antfile="GlobalsDBGraphAPI_Tests/glbgraphapi_tests.ant.xml"
+			useNativeBasedir="true"
+			target="junittest"
+		/>
+	</target>
+</project>
