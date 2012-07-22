@@ -31,13 +31,14 @@
             this.comboTargetNodes = new System.Windows.Forms.ComboBox();
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
+            this.lblPrompt = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // comboTargetNodes
             // 
             this.comboTargetNodes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboTargetNodes.FormattingEnabled = true;
-            this.comboTargetNodes.Location = new System.Drawing.Point(50, 12);
+            this.comboTargetNodes.Location = new System.Drawing.Point(52, 65);
             this.comboTargetNodes.Name = "comboTargetNodes";
             this.comboTargetNodes.Size = new System.Drawing.Size(264, 21);
             this.comboTargetNodes.TabIndex = 0;
@@ -47,7 +48,7 @@
             // 
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.buttonOK.Enabled = false;
-            this.buttonOK.Location = new System.Drawing.Point(78, 53);
+            this.buttonOK.Location = new System.Drawing.Point(80, 106);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 1;
@@ -58,27 +59,38 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(186, 53);
+            this.buttonCancel.Location = new System.Drawing.Point(188, 106);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 2;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             // 
+            // lblPrompt
+            // 
+            this.lblPrompt.AutoSize = true;
+            this.lblPrompt.Location = new System.Drawing.Point(43, 13);
+            this.lblPrompt.Name = "lblPrompt";
+            this.lblPrompt.Size = new System.Drawing.Size(110, 13);
+            this.lblPrompt.TabIndex = 3;
+            this.lblPrompt.Text = "instructions for user ...";
+            // 
             // TargetChooser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(367, 101);
+            this.ClientSize = new System.Drawing.Size(372, 158);
+            this.Controls.Add(this.lblPrompt);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.comboTargetNodes);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "TargetChooser";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "TargetChooser";
+            this.Text = "Choose";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -87,5 +99,6 @@
         private System.Windows.Forms.ComboBox comboTargetNodes;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
+        private System.Windows.Forms.Label lblPrompt;
     }
 }

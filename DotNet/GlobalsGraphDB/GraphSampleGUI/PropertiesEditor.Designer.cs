@@ -77,6 +77,7 @@
             // 
             // buttonEdit
             // 
+            this.buttonEdit.Enabled = false;
             this.buttonEdit.Location = new System.Drawing.Point(112, 120);
             this.buttonEdit.Name = "buttonEdit";
             this.buttonEdit.Size = new System.Drawing.Size(75, 23);
@@ -87,6 +88,7 @@
             // 
             // buttonDelete
             // 
+            this.buttonDelete.Enabled = false;
             this.buttonDelete.Location = new System.Drawing.Point(193, 120);
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(75, 23);
@@ -104,7 +106,7 @@
             this.labelPropValue.TabIndex = 6;
             this.labelPropValue.Text = "(value)";
             // 
-            // NodeProperties
+            // PropertiesEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -116,9 +118,10 @@
             this.Controls.Add(this.comboProps);
             this.Controls.Add(this.lblProps);
             this.Controls.Add(this.lblName);
-            this.Name = "NodeProperties";
+            this.Name = "PropertiesEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "NodeProperties";
+            this.Text = "Properties";
+            this.Load += new System.EventHandler(this.PropertiesEditor_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

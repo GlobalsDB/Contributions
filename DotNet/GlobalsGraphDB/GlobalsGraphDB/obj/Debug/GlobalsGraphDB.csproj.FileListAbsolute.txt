@@ -1,0 +1,5 @@
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GlobalsGraphDB\bin\Debug\GlobalsGraphDB.dll
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GlobalsGraphDB\bin\Debug\GlobalsGraphDB.pdb
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GlobalsGraphDB\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GlobalsGraphDB\obj\Debug\GlobalsGraphDB.dll
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GlobalsGraphDB\obj\Debug\GlobalsGraphDB.pdb

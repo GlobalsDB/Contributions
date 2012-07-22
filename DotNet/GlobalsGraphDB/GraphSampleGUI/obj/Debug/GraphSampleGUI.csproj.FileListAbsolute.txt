@@ -1,0 +1,14 @@
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\bin\Debug\GraphSampleGUI.exe
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\bin\Debug\GraphSampleGUI.pdb
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\bin\Debug\GlobalsGraphDB.dll
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\bin\Debug\GlobalsGraphDB.pdb
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.frmMain.resources
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.InputDialog.resources
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.PropertiesEditor.resources
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.Properties.Resources.resources
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.TargetChooser.resources
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.exe
+C:\Users\bsherman\Documents\GitHub\Contributions\DotNet\GlobalsGraphDB\GraphSampleGUI\obj\Debug\GraphSampleGUI.pdb

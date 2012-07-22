@@ -20,7 +20,7 @@ namespace GraphSampleGUI
         }
 
 
-        public void OfferAllNodes(GlGraph working_graph)
+        public void OfferAllNodes(GlGraph working_graph, String prompt)
         {
             List<NodeWrapper> valid_targets = new List<NodeWrapper>();
             foreach (GlGraphNode loop_node in working_graph.AllNodes)
@@ -31,10 +31,11 @@ namespace GraphSampleGUI
             comboTargetNodes.DisplayMember = "NodeName";
             comboTargetNodes.DataSource = new BindingList<NodeWrapper>(valid_targets);
             comboTargetNodes.Refresh();
+            lblPrompt.Text = prompt; 
 
         }
 
-        public void InitForNewEdge(GlGraph working_graph, GlGraphNode start_node)
+        public void InitForNewEdge(GlGraph working_graph, GlGraphNode start_node, String prompt)
         {
             List<NodeWrapper> valid_targets = new List<NodeWrapper>(); 
             foreach (GlGraphNode loop_node in working_graph.AllNodes)
@@ -48,6 +49,7 @@ namespace GraphSampleGUI
             comboTargetNodes.DisplayMember = "NodeName";
             comboTargetNodes.DataSource = new BindingList<NodeWrapper>(valid_targets);
             comboTargetNodes.Refresh();
+            lblPrompt.Text = prompt; 
              
         }
 

@@ -63,7 +63,9 @@ namespace GraphSampleGUI
                 listNodes.DataSource = new BindingList<NodeWrapper>(working_list);
             }
 
-            listNodes.Refresh(); 
+            listNodes.Refresh();
+            DisplayNodeControls();
+
         }
 
         
@@ -79,7 +81,8 @@ namespace GraphSampleGUI
                 listEdges.DataSource = new BindingList<EdgeWrapper>(CurrentSelectedNodeWrapper().AllEdges()); 
             }
 
-            listEdges.Refresh(); 
+            listEdges.Refresh();
+            DisplayEdgeControls(); 
         }
 
 
@@ -143,8 +146,10 @@ namespace GraphSampleGUI
 
             if (comboGraphs.SelectedItem.ToString() == GRAPH_CHOOSE_ENTRY)
             {
+                // it's the "choose ..." entry
                 CurrentGraph = null;
-                RebuildNodeList(); 
+                RebuildNodeList();
+                buttonNewNode.Enabled = false; 
             }
             else
             {
@@ -153,7 +158,9 @@ namespace GraphSampleGUI
                 if (CurrentGraph == null)
                     MessageBox.Show(err_msg);
                 else
-                    RebuildNodeList(); 
+                    RebuildNodeList();
+
+                buttonNewNode.Enabled = true; 
             }
 
             buttonDeleteGraph.Enabled = (CurrentGraph != null); 
@@ -174,10 +181,30 @@ namespace GraphSampleGUI
             }
         }
 
+        private void DisplayNodeControls()
+        {
+            bool actual_node_selected = (CurrentSelectedNodeWrapper() != null);
+            buttonDeleteNode.Enabled = actual_node_selected;
+            buttonNodeProperties.Enabled = actual_node_selected;
+            buttonFindPath.Enabled = actual_node_selected;
+            buttonNewEdge.Enabled = actual_node_selected;
+            listEdges.Enabled = actual_node_selected;
+            if (actual_node_selected)
+            {
+                labelEdges.Text = "Edges STARTING at " + CurrentSelectedNodeWrapper().NodeName + ", ENDING at ...";
+            }
+            else
+            {
+                labelEdges.Text = "(no node selected)";
+            }
+
+            RebuildEdgeList();
+
+        }
 
         private void listNodes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RebuildEdgeList(); 
+            DisplayNodeControls(); 
         }
 
         private void buttonDeleteNode_Click(object sender, EventArgs e)
@@ -222,7 +249,7 @@ namespace GraphSampleGUI
             if (current_node == null) return;
             
             TargetChooser destination_dlg = new TargetChooser();
-            destination_dlg.OfferAllNodes(CurrentGraph); //, current_node.GraphNode);
+            destination_dlg.OfferAllNodes(CurrentGraph, "choose destination node for the path"); //, current_node.GraphNode);
             destination_dlg.ShowDialog();
             if (destination_dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
             {
@@ -251,13 +278,20 @@ namespace GraphSampleGUI
         
         #region edge events
 
+        private void DisplayEdgeControls()
+        {
+            bool actual_edge_selected = (CurrentSelectedEdgeWrapper() != null);
+            buttonDeleteEdge.Enabled = actual_edge_selected;
+            buttonEdgeProperties.Enabled = actual_edge_selected; 
+        }
+
         private void buttonNewEdge_Click(object sender, EventArgs e)
         {
             NodeWrapper current_node = CurrentSelectedNodeWrapper(); 
             if (current_node == null) return; 
 
             TargetChooser new_edge_dlg = new TargetChooser();
-            new_edge_dlg.InitForNewEdge(CurrentGraph, current_node.GraphNode);
+            new_edge_dlg.InitForNewEdge(CurrentGraph, current_node.GraphNode, "Choose destination node for the new edge");
             new_edge_dlg.ShowDialog();
             if (new_edge_dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
             {
@@ -285,6 +319,11 @@ namespace GraphSampleGUI
             node_dialog.InitForEdge(node_to_edit);
             node_dialog.ShowDialog();
 
+        }
+
+        private void listEdges_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DisplayEdgeControls(); 
         }
         #endregion
 

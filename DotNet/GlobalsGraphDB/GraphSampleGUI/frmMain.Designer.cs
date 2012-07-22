@@ -52,27 +52,27 @@
             this.comboGraphs.FormattingEnabled = true;
             this.comboGraphs.Location = new System.Drawing.Point(32, 30);
             this.comboGraphs.Name = "comboGraphs";
-            this.comboGraphs.Size = new System.Drawing.Size(165, 21);
+            this.comboGraphs.Size = new System.Drawing.Size(245, 21);
             this.comboGraphs.TabIndex = 0;
             this.comboGraphs.SelectedIndexChanged += new System.EventHandler(this.comboGraphs_SelectedIndexChanged);
             // 
             // buttonNewGraph
             // 
-            this.buttonNewGraph.Location = new System.Drawing.Point(231, 30);
+            this.buttonNewGraph.Location = new System.Drawing.Point(298, 28);
             this.buttonNewGraph.Name = "buttonNewGraph";
-            this.buttonNewGraph.Size = new System.Drawing.Size(75, 23);
+            this.buttonNewGraph.Size = new System.Drawing.Size(107, 23);
             this.buttonNewGraph.TabIndex = 2;
-            this.buttonNewGraph.Text = "New ...";
+            this.buttonNewGraph.Text = "New graph ...";
             this.buttonNewGraph.UseVisualStyleBackColor = true;
             this.buttonNewGraph.Click += new System.EventHandler(this.buttonNewGraph_Click);
             // 
             // buttonDeleteGraph
             // 
-            this.buttonDeleteGraph.Location = new System.Drawing.Point(331, 30);
+            this.buttonDeleteGraph.Location = new System.Drawing.Point(411, 28);
             this.buttonDeleteGraph.Name = "buttonDeleteGraph";
-            this.buttonDeleteGraph.Size = new System.Drawing.Size(75, 23);
+            this.buttonDeleteGraph.Size = new System.Drawing.Size(104, 23);
             this.buttonDeleteGraph.TabIndex = 3;
-            this.buttonDeleteGraph.Text = "Delete";
+            this.buttonDeleteGraph.Text = "Delete graph";
             this.buttonDeleteGraph.UseVisualStyleBackColor = true;
             this.buttonDeleteGraph.Click += new System.EventHandler(this.buttonDeleteGraph_Click);
             // 
@@ -83,7 +83,7 @@
             this.groupBox1.Controls.Add(this.buttonNewGraph);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(439, 72);
+            this.groupBox1.Size = new System.Drawing.Size(542, 72);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Graph";
@@ -94,7 +94,7 @@
             this.listNodes.FormattingEnabled = true;
             this.listNodes.Location = new System.Drawing.Point(28, 112);
             this.listNodes.Name = "listNodes";
-            this.listNodes.Size = new System.Drawing.Size(181, 199);
+            this.listNodes.Size = new System.Drawing.Size(189, 199);
             this.listNodes.TabIndex = 5;
             this.listNodes.SelectedIndexChanged += new System.EventHandler(this.listNodes_SelectedIndexChanged);
             // 
@@ -140,7 +140,7 @@
             // labelEdges
             // 
             this.labelEdges.AutoSize = true;
-            this.labelEdges.Location = new System.Drawing.Point(340, 96);
+            this.labelEdges.Location = new System.Drawing.Point(330, 96);
             this.labelEdges.Name = "labelEdges";
             this.labelEdges.Size = new System.Drawing.Size(61, 13);
             this.labelEdges.TabIndex = 11;
@@ -151,8 +151,9 @@
             this.listEdges.FormattingEnabled = true;
             this.listEdges.Location = new System.Drawing.Point(333, 112);
             this.listEdges.Name = "listEdges";
-            this.listEdges.Size = new System.Drawing.Size(174, 199);
+            this.listEdges.Size = new System.Drawing.Size(194, 199);
             this.listEdges.TabIndex = 12;
+            this.listEdges.SelectedIndexChanged += new System.EventHandler(this.listEdges_SelectedIndexChanged);
             // 
             // buttonEdgeProperties
             // 

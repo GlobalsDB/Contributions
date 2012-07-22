@@ -43,11 +43,13 @@ namespace GraphSampleGUI
 
             comboProps.DataSource = propnames;
             labelPropValue.Text = ""; 
-            comboProps.Refresh();  
+            comboProps.Refresh();
+            DisplayPropVal(); 
         }
 
         public void InitForNode(GlGraphNode _working_node)
         {
+            this.Text = "Node properties";
             working_node = _working_node;
             lblName.Text = "Node name: " + working_node.GetCustomString(NodeWrapper.NODE_NAME_PROPERTY);
             RebuildList(); 
@@ -55,8 +57,9 @@ namespace GraphSampleGUI
 
         public void InitForEdge(EdgeWrapper current_edge_wrapper)
         {
+            this.Text = "Edge properties";
             working_edge = current_edge_wrapper.GraphEdge;
-            lblName.Text = "Edge: " + current_edge_wrapper.EdgeName;
+            lblName.Text = "Edge name: " + current_edge_wrapper.EdgeName;
             RebuildList(); 
         }
 
@@ -88,12 +91,26 @@ namespace GraphSampleGUI
 
         private void DisplayPropVal()
         {
-            string propname = comboProps.SelectedItem.ToString();
-            labelPropValue.Text = working_component.GetCustomString(propname); 
+            string propname = "";
+            if (comboProps.SelectedIndex == -1)
+            {
+                buttonEdit.Enabled = false;
+                buttonDelete.Enabled = false;
+            }
+            else
+            {
+                comboProps.SelectedItem.ToString();
+                buttonEdit.Enabled = true;
+                buttonDelete.Enabled = true;
+            }
+
+            labelPropValue.Text = working_component.GetCustomString(propname);
+
         }
 
         private void comboProps_SelectedIndexChanged(object sender, EventArgs e)
         {
+
             DisplayPropVal(); 
         }
 
@@ -116,6 +133,11 @@ namespace GraphSampleGUI
             string propname = comboProps.SelectedItem.ToString();
             working_component.DeleteCustomString(propname);
             RebuildList(); 
+        }
+
+        private void PropertiesEditor_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
